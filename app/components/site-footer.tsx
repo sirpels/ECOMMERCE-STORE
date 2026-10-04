@@ -1,0 +1,2 @@
+import Link from "next/link";
+export function SiteFooter() { return <footer className="border-t border-border bg-surface"><div className="mx-auto flex w-[min(100%-2rem,72rem)] flex-col gap-2 py-6 text-sm text-muted sm:w-[min(100%-4rem,72rem)] sm:flex-row sm:items-center sm:justify-between"><p>Atelier Placeholder — fashion store foundation.</p><Link href="/health" className="hover:text-foreground">System health</Link></div></footer>; }
