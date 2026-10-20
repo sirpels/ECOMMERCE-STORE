@@ -1,19 +1,17 @@
 "use client";
 
 import { useChat } from "@ai-sdk/react";
-import { DefaultChatTransport, type UIMessage } from "ai";
+import { DefaultChatTransport } from "ai";
 import { useEffect, useRef, useState } from "react";
+import type { AdvisorMessage } from "../../lib/ai/messages";
+import { getOutgoingMessages } from "../../lib/ai/client-history";
+import FabricGuidanceResult from "./fabric-guidance-result";
 
-const transport = new DefaultChatTransport<UIMessage>({
+const transport = new DefaultChatTransport<AdvisorMessage>({
   api: "/api/chat",
   prepareSendMessagesRequest: ({ messages }) => ({
     body: {
-      // Send only text. SDK step markers and empty stopped responses are not context.
-      messages: messages.map((message) => ({
-        id: message.id,
-        role: message.role,
-        parts: message.parts.filter((part) => part.type === "text"),
-      })).filter((message) => message.parts.some((part) => part.text.trim())),
+      messages: getOutgoingMessages(messages),
     },
   }),
 });
@@ -27,7 +25,7 @@ function errorMessage(error: Error): string {
 }
 
 export default function AdvisorChat() {
-  const { messages, sendMessage, status, error, stop, clearError } = useChat<UIMessage>({
+  const { messages, sendMessage, status, error, stop, clearError } = useChat<AdvisorMessage>({
     transport,
     resume: false,
   });
@@ -44,7 +42,9 @@ export default function AdvisorChat() {
   const lastMessage = messages.at(-1);
   const hasResponseText = lastMessage?.role === "assistant" &&
     lastMessage.parts.some((part) => part.type === "text" && part.text.length > 0);
-  const thinking = busy && !hasResponseText;
+  const hasToolPart = lastMessage?.role === "assistant" &&
+    lastMessage.parts.some((part) => part.type === "tool-findFabricGuidance");
+  const thinking = busy && !hasResponseText && !hasToolPart;
 
   useEffect(() => {
     const viewport = viewportRef.current;
@@ -123,12 +123,16 @@ export default function AdvisorChat() {
         <div ref={contentRef} className="space-y-5">
           {messages.length === 0 && <p className="text-sm leading-6 text-muted">Tell me about your occasion or the fabric you have in mind. Please avoid sharing personal details.</p>}
           {messages.map((message) => {
-            const textParts = message.parts.filter((part) => part.type === "text");
-            if (!textParts.some((part) => part.text.length > 0)) return null;
+            if (!message.parts.some((part) => part.type === "tool-findFabricGuidance" ||
+              (part.type === "text" && part.text.length > 0))) return null;
             return (
-              <article key={message.id} aria-label={message.role === "user" ? "Your message" : "Advisor response"} className={`max-w-[95%] rounded-card p-4 ${message.role === "user" ? "ml-auto bg-accent" : "mr-auto border border-border bg-background"}`}>
+              <article key={message.id} aria-label={message.role === "user" ? "Your message" : "Advisor response"} className={`min-w-0 max-w-[95%] rounded-card p-4 ${message.role === "user" ? "ml-auto bg-accent" : "mr-auto border border-border bg-background"}`}>
                 <p className="mb-2 text-xs font-semibold text-primary">{message.role === "user" ? "You" : "Advisor"}</p>
-                {textParts.map((part, index) => <p key={index} className="whitespace-pre-wrap text-sm leading-7 [overflow-wrap:anywhere]">{part.text}</p>)}
+                {message.parts.map((part, index) => {
+                  if (part.type === "text") return <p key={index} className="whitespace-pre-wrap text-sm leading-7 [overflow-wrap:anywhere]">{part.text}</p>;
+                  if (part.type === "tool-findFabricGuidance") return <FabricGuidanceResult key={part.toolCallId} part={part} active={busy && !stopping && message.id === lastMessage?.id} />;
+                  return null;
+                })}
               </article>
             );
           })}

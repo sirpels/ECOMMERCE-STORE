@@ -62,8 +62,9 @@ file contains only a blank entry. Missing or placeholder keys return HTTP 503.
 Restart the development server after changing environment variables.
 
 `lib/ai/config.ts` owns the server-only model configuration and system prompt.
-`POST /api/chat` accepts text-only user/assistant messages, converts them to model
-messages, and streams UI message events. Client text parts render as plain text.
+`POST /api/chat` accepts text-only user messages and validated assistant text/tool
+history, converts them to model messages, and streams UI message events. Client
+text parts render as plain text; typed Fabric Match parts render as React cards.
 Chats remain in browser memory and are lost on reload. No stock, price, product
 search, or ordering integration is present.
 
@@ -89,10 +90,11 @@ project configured for the Free Tier; account billing and eligibility cannot be
 enforced by this application. Free-tier quotas and model availability can change.
 Provider failures and quota exhaustion show a safe error instead of raw details.
 
-The endpoint is public and has no per-user rate limit or authentication. Payload
-and token limits bound one request, but do not prevent repeated requests from
-exhausting the quota. Review that exposure before public deployment. No external
-rate-limiting service or conversation persistence is installed.
+The endpoint is public and has no application-level per-user rate limit or
+authentication. The developer has configured protection in the Vercel Firewall;
+that external setting is not managed by this repository. Payload and token limits
+bound one request but do not guarantee remaining quota. No external rate-limiting
+dependency or conversation persistence is installed.
 
 Recommended demo protection: configure the included Vercel Hobby WAF rate-limit
 rule for POST requests to `/api/chat`, counted per IP, for example 6 requests per
@@ -132,3 +134,163 @@ Dependency audit: the five high-severity findings are in the development-only
 ESLint chain (`eslint-config-next`, `@next/eslint-plugin-next`, `fast-glob`,
 `micromatch`, and `braces`). `npm audit --omit=dev` reported zero vulnerabilities.
 No forced fixes or dependency changes were applied during model verification.
+
+## FE-07 Phase A: Fabric Match server foundation
+
+`findFabricGuidance` is a server-executed AI SDK tool for general fabric-category
+guidance. It does not query products, availability, prices, orders, or a database.
+
+### Contracts and curated matching
+
+The strict Zod contracts live in `lib/ai/fabric-guidance.ts`. Inputs are required:
+
+- Occasion: `everyday`, `work`, `wedding`, or `formal_event`.
+- Climate: `hot`, `mild`, or `cool`.
+- Main priority: `breathability`, `easy_care`, `drape`, or `structure`.
+
+```ts
+z.object({
+  occasion: z.enum(["everyday", "work", "wedding", "formal_event"]),
+  climate: z.enum(["hot", "mild", "cool"]),
+  priority: z.enum(["breathability", "easy_care", "drape", "structure"]),
+}).strict();
+```
+
+All three fields are required; additional properties are rejected.
+
+The advisor must ask about missing or ambiguous preferences. It does not silently
+invent defaults. `lib/ai/fabric-reference.ts` contains six curated categories:
+cotton wovens, linen-rich wovens, wool suiting, fluid viscose wovens, easy-care
+blends, and fluid crepe-textured fabrics. Their modest claims are qualified by
+composition, weave, weight, finish, and care requirements; crepe is not treated as
+a definite fibre composition.
+
+All three criteria must match. Eligible entries retain dataset order, with no
+random scores or generated reference text. At most three suggestions are returned.
+An unreviewed combination returns an empty list, not invented matches. For
+example, `formal_event` / `cool` / `breathability` currently has no matching entry.
+
+The runtime-validated output contains `kind: "general-fabric-guidance"`, the
+validated input, suggestions (`name`, `rationale`, `consideration`),
+`source: "developer-curated-reference"`, `inventoryVerified: false`, and this fixed
+disclaimer: "General fabric guidance only. Store products, prices, stock, and
+availability are not verified."
+
+### Execution and safe history
+
+`lib/ai/tools.ts` defines the tool. Each request receives a new execution budget:
+one call may execute the reference lookup, including when multiple calls arrive
+in parallel. Further attempts fail safely. A failed attempt is not retried.
+`streamText` allows at most two model steps; the first may call the tool, and the
+second has tools disabled and can explain its result or failure. The unchanged
+512 output-token limit applies per model call, so a two-step request can use up
+to 1,024 output tokens. The same 45-second abort/timeout covers both steps.
+
+`lib/ai/messages.ts` prepares the shared typed message contract.
+`lib/ai/chat-history.ts` keeps user messages text-only and allowlists assistant
+text, step markers, and the four states of `tool-findFabricGuidance`. It rejects
+unknown tools, unsupported metadata/approvals, duplicate IDs, and malformed
+parts. Gemini thought signatures are retained in bounded provider metadata.
+Successful historical tool outputs must exactly match a fresh deterministic
+lookup, not just pass a schema. Historical tool errors become a fixed safe
+message; internal error details are never forwarded. Existing message-count and
+body-size limits remain; structured parts also count toward conversation limits.
+
+Incomplete stopped tool calls stay in validated history but are omitted when
+building model messages. Failed calls without valid arguments are also omitted
+from model context, without fabricating replacement arguments. This keeps a new
+user message from being paired with an unresolved tool call. Cancellation is
+checked before tool work and is not converted into a tool failure.
+
+### Focused tests and genuine execution-failure testing
+
+```bash
+npm run test:fabric-guidance
+npm run lint
+npm run build
+```
+
+Tests use Node's test runner and the installed TypeScript compiler in memory.
+The `react-server` condition permits the existing `server-only` boundary. SDK
+mock models test execution and UI-stream protocol events without using Gemini
+quota; these are server tests, not claims of live Gemini or React card rendering.
+
+To exercise a genuine tool exception locally, start a development server with
+`FABRIC_GUIDANCE_TEST_FAILURE=1` in its server environment. For PowerShell:
+
+```powershell
+$env:FABRIC_GUIDANCE_TEST_FAILURE = "1"
+npm run dev -- --port 3101
+```
+
+Submit a complete prompt, such as "Match fabrics for work, in mild weather, with
+structure as my priority." The development-only mode forces the named tool in
+step one; its actual `execute` function then throws the safe error. The stream
+emits `output-error`, not a fabricated successful result. Stop still aborts the
+request normally. Disable the flag and restart to return to normal behavior:
+
+```powershell
+Remove-Item Env:FABRIC_GUIDANCE_TEST_FAILURE
+npm run dev -- --port 3101
+```
+
+The flag is ignored unless `NODE_ENV` is exactly `development`. No public request
+field, query parameter, or customer input enables this mode. Do not enable the
+flag on Vercel. Existing production settings and firewall rules are unchanged.
+
+### Phase B: Fabric Match UI
+
+The chat now uses the shared `AdvisorMessage` type. `fabric-guidance-result.tsx`
+renders preparation, searching with preferences, category cards (or an honest
+empty result), and a fixed accessible error. Incomplete inputs are never treated
+as complete selections. Pending parts from stopped requests display "Stopped";
+completed cards and partial text remain in the conversation. There is no automatic
+retry, resubmission, or resumption. The existing Send/Stop and scroll logic remain.
+
+| Typed state | UI |
+| --- | --- |
+| `input-streaming` | Preparation indicator; incomplete selections are not presented as final. |
+| `input-available` | Validated preferences and searching status. |
+| `output-available` | Up to three recommendation cards and the inventory disclaimer, or an honest empty result. |
+| `output-error` | Accessible error card: "Fabric guidance couldn't be loaded. Please try again." |
+
+`lib/ai/client-history.ts` sends only text, assistant step boundaries and the named
+tool's four supported states. It retains Gemini signatures and tool-only messages;
+the server remains authoritative for validation and canonical historical results.
+Other tool names, dynamic parts, reasoning and source parts are not forwarded.
+
+Additional checks (no new test dependencies):
+
+```bash
+node scripts/fabric-guidance-ui.test.mjs
+npx tsc --noEmit
+node scripts/verify-fabric-advisor.mjs
+```
+
+The UI unit tests render controlled parts without Gemini calls. The browser check
+requires a running local app on port 3100 and dedicated headless Chrome with remote
+debugging on port 9222. It makes real Gemini requests and uses quota. Run it only
+when verification is needed. `FABRIC_UI_TEST_MODE=failure` selects the browser
+failure checks; it does not enable server failures. The server must separately
+be started with the development-only flag described above, then stopped and
+restarted without that flag. `FABRIC_UI_TEST_MODE=recovery` runs the normal
+tool/follow-up checks without the extra cancellation calls.
+`FABRIC_UI_TEST_MODE=regression` starts a fresh ordinary-chat conversation to
+check live text streaming, pinned/unpinned scrolling, Jump to latest, Stop before
+and after text, and Send after Stop. In PowerShell set the mode with
+`$env:FABRIC_UI_TEST_MODE = "regression"` before running the browser script.
+
+Local Phase B verification observed an automatic Gemini tool call, three curated
+cards, a subsequent explanation, and a follow-up retaining the preferences and
+tool signatures. The development-only execute exception produced safe error
+cards and accepted a subsequent message; the failure server was then stopped and
+normal mode restored. The brief preparation state is covered by controlled
+component tests; live wire events confirm streamed tool input, but React may batch
+that state before it is visibly painted.
+
+Real ordinary-chat checks verified progressive text, thinking, Stop before/after
+text, retained partial text, Send after Stop, context, and scroll/Jump behavior
+during streaming. Cards fit 320, 375, 390 and 1280px. Some live attempts reached the
+existing 45-second timeout; these were not counted as streaming passes. Browser
+tests depend on provider latency and quota. Release requires developer approval,
+a reviewed commit, and verification of real tool execution in production.
