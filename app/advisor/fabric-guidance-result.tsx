@@ -19,15 +19,15 @@ function Preferences({ input }: { input: FabricGuidanceInput }) {
 }
 
 // Pure presentation, imported by the existing client boundary. No server code.
-export default function FabricGuidanceResult({ part, active }: { part: FabricGuidancePart; active: boolean }) {
+export default function FabricGuidanceResult({ part, active, outcome = "stopped", onAdjustPreferences }: { part: FabricGuidancePart; active: boolean; outcome?: "stopped" | "interrupted"; onAdjustPreferences?: () => void }) {
   const base = "my-3 min-w-0 rounded-card p-3 text-sm [overflow-wrap:anywhere] transition-colors motion-reduce:transition-none";
   if (part.state === "input-streaming" || part.state === "input-available") {
     const preparing = part.state === "input-streaming";
     return <section aria-label="Fabric Match" data-tool-state={part.state} className={`${base} ${!active ? "border border-border bg-surface" : preparing ? "border border-dashed border-primary bg-background" : "border border-primary bg-accent"}`}>
-      <h3 className="font-semibold">Fabric Match · {!active ? "Stopped" : preparing ? "Preparing" : "Searching"}</h3>
+      <h3 className="font-semibold">Fabric Match · {!active ? outcome === "stopped" ? "Stopped" : "Interrupted" : preparing ? "Preparing" : "Searching"}</h3>
       {part.state === "input-available" && <Preferences input={part.input} />}
       <p role="status" className={`mt-2 text-xs text-muted ${active ? "motion-safe:animate-pulse" : ""}`}>
-        {!active ? "Lookup stopped. Send a new message to try again." : preparing ? "Preparing a fabric lookup from your preferences…" : "Finding general fabric categories in the curated reference…"}
+        {!active ? outcome === "stopped" ? "Lookup stopped. Send a new message to try again." : "Lookup interrupted. Retry the response or send another question." : preparing ? "Preparing a fabric lookup from your preferences…" : "Finding general fabric categories in the curated reference…"}
       </p>
     </section>;
   }
@@ -49,5 +49,6 @@ export default function FabricGuidanceResult({ part, active }: { part: FabricGui
       </li>)}
     </ul> : <p className="mt-4 rounded-card bg-background p-3 leading-6">No matching fabric category is listed in this reference for these preferences. You can ask about a different priority or discuss the requirements with a tailor.</p>}
     <p className="mt-4 border-t border-border pt-3 text-xs leading-5 text-muted">{part.output.disclaimer}</p>
+    {!part.output.suggestions.length && onAdjustPreferences && <button type="button" onClick={onAdjustPreferences} className="mt-3 rounded-card border border-primary px-4 py-3 font-medium">Adjust preferences</button>}
   </section>;
 }

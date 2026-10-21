@@ -6,6 +6,7 @@ import {
   fabricGuidanceOutputSchema,
 } from "./fabric-guidance";
 import { findFabricMatches } from "./fabric-reference";
+import { getDevScenario } from "./dev-scenarios";
 
 export class FabricGuidanceError extends Error {
   constructor() {
@@ -35,8 +36,9 @@ export function createAdvisorTools() {
         if (executions++ >= 1) throw new FabricGuidanceError();
         try {
           const validatedInput = fabricGuidanceInputSchema.parse(input);
-          if (isFabricGuidanceFailureTestEnabled()) throw new FabricGuidanceError();
+          if (isFabricGuidanceFailureTestEnabled() || getDevScenario() === "tool-failure") throw new FabricGuidanceError();
           const output = findFabricMatches(validatedInput); // Output is runtime-validated.
+          if (getDevScenario() === "malformed-tool") fabricGuidanceOutputSchema.parse({ ...output, suggestions: [{ name: "" }] });
           abortSignal?.throwIfAborted();
           return output;
         } catch {

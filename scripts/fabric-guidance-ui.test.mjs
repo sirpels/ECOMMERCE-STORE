@@ -37,6 +37,17 @@ test("stopped pending parts do not keep loading", () => {
     assert.doesNotMatch(html, /animate-pulse|Preparing a fabric lookup|Finding general/);
   }
 });
+test("failed pending lookup is interrupted, not an intentional Stop", () => {
+  const html = renderToStaticMarkup(React.createElement(Component, { part: { ...base, state: "input-available", input }, active: false, outcome: "interrupted" }));
+  assert.match(html, /Lookup interrupted/);
+  assert.doesNotMatch(html, /Lookup stopped|animate-pulse/);
+});
+test("empty result provides a fill-only adjustment action when supplied", () => {
+  const html = renderToStaticMarkup(React.createElement(Component, { part: { ...base, state: "output-available", input, output: { input, suggestions: [], disclaimer: "Not inventory." } }, active: false, onAdjustPreferences() {} }));
+  assert.match(html, /type="button"/);
+  assert.match(html, /Adjust preferences/);
+  assert.match(html, /Not inventory/);
+});
 test("failure uses the exact safe accessible message, never raw errors", () => {
   const html = render({ state: "output-error", input, errorText: "SECRET_INTERNAL_EXCEPTION" });
   assert.match(html, /role="alert"/);

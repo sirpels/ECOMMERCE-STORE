@@ -1,9 +1,11 @@
 import type { Metadata } from "next";
 import AdvisorChat from "./advisor-chat";
+import { shouldCrashAdvisorRoute } from "../../lib/ai/dev-scenarios";
 
 export const metadata: Metadata = { title: "Fabric & Style Advisor" };
 
 export default function AdvisorPage() {
+  if (shouldCrashAdvisorRoute()) throw new Error("Local Advisor render test");
   return (
     <section className="py-8 sm:py-12" aria-labelledby="advisor-title">
       <p className="mb-3 text-sm font-semibold tracking-[0.16em] text-muted uppercase">Storefront</p>

@@ -294,3 +294,104 @@ during streaming. Cards fit 320, 375, 390 and 1280px. Some live attempts reached
 existing 45-second timeout; these were not counted as streaming passes. Browser
 tests depend on provider latency and quota. Release requires developer approval,
 a reviewed commit, and verification of real tool execution in production.
+
+## FE-08: Error states, empty states and recovery
+
+The advisor classifies network/offline errors, HTTP 429, provider quota errors,
+HTTP validation failures, unavailable service, stream interruption, timeouts and
+unknown failures using fixed messages in `lib/ai/errors.ts`. Raw response bodies,
+provider details and stack traces are never displayed. `Retry-After` is honored
+when a valid header is supplied. There are no automatic retries. Validation and
+content-filter refusals offer editing instead of repeating an unsuitable request.
+Empty completions are recoverable; length-limited responses invite a follow-up.
+
+"Retry response" uses the installed AI SDK's `regenerate` for the latest failed
+turn only. Earlier successful messages and Gemini metadata remain. A synchronous
+request lock blocks double-clicks and simultaneous sends; Retry is disabled while
+busy, stopping, offline or in a known cooldown. The last incomplete response is
+kept in a labeled display-only snapshot while its replacement streams. It is not
+added to `messages` or sent to Gemini. Success clears the snapshot/error; another
+failure remains recoverable. Sending a new question removes the older Retry
+action. Intentional Stop is not an error and never triggers automatic recovery.
+
+Pending tool parts can display "Interrupted" separately from "Stopped" without
+changing the four SDK tool states. Completed cards and received text are kept on
+failure. The 45-second server deadline produces an explicit safe timeout error.
+The first-run examples and empty-result "Adjust preferences" action only fill and
+focus the editable composer; they never submit. Slow requests retain Stop and
+show reassuring feedback after ten seconds, with no invented progress values.
+
+`app/advisor/error.tsx` is a Client Component using this Next.js version's `retry()`
+prop for route rendering recovery. It does not handle API errors or promise chat
+persistence: recovering a rendering crash may restart the in-memory conversation.
+
+### Quota-free local sabotage and tests
+
+All fixtures require `NODE_ENV=development`, no `VERCEL` environment flag, and an
+explicit server environment selection. There are no public test controls, request
+parameters or customer-text switches. The model ID, production key and firewall
+configuration are unchanged. Fixtures are labeled local test output, not Gemini.
+
+`ADVISOR_DEV_SCENARIO` accepts `recovery`, `http503`, `http429`, `quota`,
+`midstream`, `disconnect`, `slow`, `timeout`, `tool-failure`, `malformed-tool`,
+`empty-match`, `empty-response`, or `refusal`. The existing SDK mock model drives
+the real streaming pipeline and real curated tool execute function without any
+Gemini call. `midstream` throws after text; `disconnect` genuinely errors the HTTP
+response body after text. Malformed tool output is rejected before success cards.
+`http429` supplies a two-second Retry-After. `timeout` shortens the local test
+deadline only. `recovery` uses a documented deterministic request sequence:
+baseline tool success, partial tool/text failure, successful retry, long response,
+send after Stop, pre-text Stop, and Stop during tool input. Restart to reset it.
+
+`ADVISOR_DEV_ROUTE_ERROR=once` causes one route-rendering exception for recovery
+testing; `1` keeps throwing until disabled. Offline testing uses browser network
+emulation, not a server flag. A fresh page tests first-run emptiness. The original
+`FABRIC_GUIDANCE_TEST_FAILURE` flag remains supported, but by itself still uses
+Gemini; use `ADVISOR_DEV_SCENARIO=tool-failure` for quota-free browser verification.
+
+```powershell
+# Local manual fixture; stop it before changing scenarios.
+$env:ADVISOR_DEV_SCENARIO = "midstream"
+npm run dev -- --port 3100
+```
+
+```bash
+npm run test:fabric-guidance
+node scripts/fabric-guidance-ui.test.mjs
+node --conditions=react-server scripts/advisor-errors.test.mjs
+npx tsc --noEmit
+npm run lint
+npm run build
+```
+
+For actual browser/transport tests, launch a **dedicated** Chrome profile with
+remote debugging on port 9222. With port 3100 free, run:
+
+```bash
+node scripts/run-advisor-edge-cases.mjs
+```
+
+The runner owns and stops only the local dev processes it creates. Optional case
+arguments select individual scenarios. The browser test proves partial content,
+real exception delivery, visible error and Retry, double-click protection,
+snapshot exclusion, earlier tool-history preservation and recovery. It also
+checks Stop, scrolling, reduced motion and widths 320/375/390/768/1280. Static
+component tests separately cover tool states that React may batch too quickly
+for a browser paint. These fixtures are not evidence of live Gemini availability.
+
+After manual testing, stop the fixture server and remove all testing flags before
+restarting normal development:
+
+```powershell
+Remove-Item Env:ADVISOR_DEV_SCENARIO -ErrorAction SilentlyContinue
+Remove-Item Env:ADVISOR_DEV_ROUTE_ERROR -ErrorAction SilentlyContinue
+Remove-Item Env:FABRIC_GUIDANCE_TEST_FAILURE -ErrorAction SilentlyContinue
+npm run dev -- --port 3100
+```
+
+Keep the existing normal-flow composer, 16px textarea, visible focus and reduced
+motion styles. Chrome viewport tests do not establish iOS keyboard behavior;
+actual Safari/iPhone keyboard and screen-reader review remain manual checks.
+Checkpoint evidence should label local failure recordings, show Retry recovery
+at 375px, and include a genuine Gemini happy path only when quota permits. Never
+substitute fixture text for a real-provider success recording.

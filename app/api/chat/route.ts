@@ -7,7 +7,10 @@ import {
 } from "ai";
 import { advisorConfig, getAdvisorModel } from "@/lib/ai/config";
 import { ChatRequestError as RequestError, getModelHistory, validateAdvisorMessages } from "@/lib/ai/chat-history";
-import { createAdvisorTools, FabricGuidanceError, prepareAdvisorToolStep } from "@/lib/ai/tools";
+import { createAdvisorTools, prepareAdvisorToolStep } from "@/lib/ai/tools";
+import { errorCodeText } from "@/lib/ai/errors";
+import { safeStreamError, withTimeoutError } from "@/lib/ai/stream-errors";
+import { getDevScenario, devHttpResponse, getDevModel, disconnectFixture } from "@/lib/ai/dev-scenarios";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -51,10 +54,15 @@ export async function POST(request: Request) {
   try {
     const tools = createAdvisorTools();
     const messages = await validateAdvisorMessages(await readBody(request), tools);
-    const model = getAdvisorModel();
+    const scenario = getDevScenario();
+    const testResponse = devHttpResponse(scenario);
+    if (testResponse) return testResponse;
+    if (scenario === "disconnect") return disconnectFixture(request.signal);
+    const model = scenario ? await getDevModel(scenario) : getAdvisorModel();
     if (!model) {
-      return new Response("The advisor is not configured yet. Please try again later.", { status: 503 });
+      return Response.json({ code: "unavailable" }, { status: 503 });
     }
+    const timeout = AbortSignal.timeout(scenario === "timeout" ? 500 : 45_000);
     const result = streamText({
       model,
       instructions: advisorConfig.system,
@@ -67,22 +75,20 @@ export async function POST(request: Request) {
       prepareStep: prepareAdvisorToolStep,
       maxOutputTokens: advisorConfig.maxOutputTokens,
       maxRetries: 0,
-      abortSignal: AbortSignal.any([request.signal, AbortSignal.timeout(45_000)]),
+      abortSignal: AbortSignal.any([request.signal, timeout]),
       // Do not log provider errors, which may contain request details.
       onError: () => {},
     });
     return createUIMessageStreamResponse({
-      stream: toUIMessageStream({
+      stream: withTimeoutError(toUIMessageStream({
         stream: result.stream,
         sendReasoning: false,
-        onError: (error) => error instanceof FabricGuidanceError
-          ? error.message
-          : "The advisor could not respond. Please try again shortly; the free-tier quota may be temporarily exhausted.",
-      }),
+        onError: safeStreamError,
+      }), timeout, request.signal),
       headers: { "Cache-Control": "no-store" },
     });
   } catch (error) {
-    if (error instanceof RequestError) return new Response(error.message, { status: error.status });
-    return new Response("The advisor is temporarily unavailable. Please try again later.", { status: 503 });
+    if (error instanceof RequestError) return new Response(errorCodeText("validation"), { status: error.status });
+    return Response.json({ code: "unavailable" }, { status: 503 });
   }
 }
