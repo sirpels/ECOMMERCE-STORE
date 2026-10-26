@@ -395,3 +395,35 @@ actual Safari/iPhone keyboard and screen-reader review remain manual checks.
 Checkpoint evidence should label local failure recordings, show Retry recovery
 at 375px, and include a genuine Gemini happy path only when quota permits. Never
 substitute fixture text for a real-provider success recording.
+
+## FE-AA1 — Smart Send Button
+
+Visit `/button-lab` (`http://localhost:3100/button-lab` when using port 3100).
+This isolated client component simulates a send with a deterministic 1000ms
+timer, never an API call. Select **Simulate Success** or **Simulate Failure**;
+changes during a run apply to the next run. The Advisor is unchanged.
+
+States: idle, hover/keyboard focus, loading, success, and persistent error with
+**Try again** and **Reset**. Success holds for 1200ms before returning to idle.
+A synchronous ref locks duplicate sends during loading/confirmation. Reset and
+unmount clear both timers; transitions do not move keyboard focus.
+
+Motion uses 150ms ease-out hover, 100ms ease-out press, 200ms ease-out label/icon
+fade, a 700ms linear spinner, and one subtle 300ms ease-out error shake.
+Transform/opacity avoid animating layout dimensions; button size stays fixed.
+Reduced motion removes all these animations/transforms, retaining status text
+and the static progress symbol. Native buttons, radio labels, visible focus,
+44px minimum control targets, aria-disabled/busy, and a polite live region
+provide non-color feedback. Busy sends remain focusable but cannot activate.
+
+For the focused real-browser checks, start the dev app on port 3100 and Chrome
+with remote debugging on port 9222, then run:
+
+```bash
+node scripts/verify-smart-send-button.mjs
+```
+
+The runner checks state sequences, duplicate clicks, next-run outcome changes,
+keyboard activation/focus, reset/unmount cleanup, reduced motion, stable button
+dimensions, console errors, and 320/375/390/1280px layouts without model calls.
+Physical mobile devices and screen-reader announcements still need manual review.
