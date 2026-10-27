@@ -427,3 +427,54 @@ The runner checks state sequences, duplicate clicks, next-run outcome changes,
 keyboard activation/focus, reset/unmount cleanup, reduced motion, stable button
 dimensions, console errors, and 320/375/390/1280px layouts without model calls.
 Physical mobile devices and screen-reader announcements still need manual review.
+
+## FE-09 — Testing pass
+
+The Advisor now has component and browser regression checks for its validated
+composer, message rendering, error recovery, and structured Fabric Match results.
+Vitest, React Testing Library, user-event, and jsdom run 13 component tests.
+They exercise the real Advisor UI with `useChat` mocked, including text parts,
+pending and streamed text, Retry with retained partial content, empty/whitespace
+validation, editable examples, and all four `tool-findFabricGuidance` states.
+The UI deliberately ignores other SDK part types such as `step-start`; those are
+not separate rendering branches and are not asserted as visible UI here.
+
+Playwright opens a local `/advisor`, edits an onboarding example, sends it, sees
+pending tool work and streamed text, and checks the Fabric Match card and ready
+composer. Its local web server sets `ADVISOR_DEV_SCENARIO=recovery` and an empty
+Google key. The existing development-only fixture passes through the real
+`/api/chat` route and AI SDK stream/tool pipeline; it never calls Gemini or uses
+quota. The test refuses to reuse an existing server and never targets production.
+Fixture output is explicitly test data, not a live provider response.
+
+Run the checks locally with:
+
+```bash
+npm ci
+npx playwright install chromium
+npm test
+npm run test:existing
+npm run test:e2e
+npm run lint
+npm run build
+npx tsc --noEmit
+```
+
+The GitHub Actions `component-and-advisor-e2e` job runs on pushes and pull
+requests with Node 22, `npm ci`, a Playwright Chromium install, both component
+and existing server/UI suites, the browser test, lint, build, and TypeScript.
+No provider credential is supplied. The job can later be required by branch
+protection; this repository does not set that policy automatically.
+
+Red-to-green exercise: on this feature branch, the assistant temporarily
+asserted that whitespace-only input enabled Send. The focused Vitest run failed
+with `Received element is not enabled`. The composer correctly blocks whitespace,
+so the assertion was restored to `toBeDisabled()`. The full 13-test component
+suite then passed. The intentional failure is absent from the final test file.
+
+Local verification on 2026-10-27: 13 Vitest component tests, 28 existing
+server/contract tests, 8 existing static UI tests, all 14 existing browser
+fixture scenarios, and the Playwright E2E test passed. Lint, the production
+build, and `tsc --noEmit` passed. GitHub Actions runs on feature-branch pushes
+and pull requests; its status must be checked on GitHub. Real Gemini requests
+and physical Safari testing were not part of this testing pass.
