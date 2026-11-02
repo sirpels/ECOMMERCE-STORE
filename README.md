@@ -478,3 +478,84 @@ fixture scenarios, and the Playwright E2E test passed. Lint, the production
 build, and `tsc --noEmit` passed. GitHub Actions runs on feature-branch pushes
 and pull requests; its status must be checked on GitHub. Real Gemini requests
 and physical Safari testing were not part of this testing pass.
+
+## FE-AA2 — fashion hero, lace photograph, and 3D Bag Studio
+
+Visit `/bag-studio` to explore a low-poly tote concept in Clay, Olive, or
+Midnight. It is a design demonstration, not verified inventory, pricing, or
+availability. The page remains a Server Component; a small Client Component
+shows a static SVG preview and only imports the React Three Fiber canvas after
+the visitor selects **Load 3D viewer**. The viewer uses an extruded tote body,
+simple handle geometry, ambient and directional lights, a bounded perspective
+camera, mouse/touch orbit and zoom, keyboard camera controls, on-demand frames,
+and a device-pixel-ratio cap of 1.5. No texture, 3D asset download,
+postprocessing, Advisor API, or Gemini request is involved.
+
+Reduced-motion, Save-Data, low-memory/low-core, unavailable WebGL, and lost
+WebGL contexts use the static color preview. The static preview remains
+color-selectable. These checks are conservative heuristics, not a complete
+device-capability assessment; physical mobile and screen-reader review are
+still useful. Run its browser check against a local server on port 3104:
+
+```bash
+npm run build
+npm run start -- --port 3104
+node scripts/verify-bag-studio.mjs http://localhost:3104
+```
+
+The homepage is a full-width, single-image editorial hero using the original
+AI-generated fashion concept. It is an illustrative outfit concept, not a claim
+that the business made or sells the pictured garment. Responsive `object-fit:
+cover` positioning keeps the model recognizable at mobile and desktop sizes;
+a restrained gradient supports the stationary heading and calls to action.
+This is a 2D image treatment with no carousel, WebGL, or animation. The
+1024×1536 WebP is 138,186 bytes. The earlier Pinterest-derived WebP copies are
+not shipped. Local source/reference photographs are Git-ignored; originals are
+unchanged. **Explore Lace** leads to `/lace`, the genuine photograph preview,
+not the `/fabrics` placeholder. **Have It Made** opens the verified business
+WhatsApp click-to-chat link in a new tab with a prefilled tailoring enquiry.
+The business number remains in one international-digits-only constant in
+`app/page.tsx`; no message is sent automatically. A six-style campaign
+carousel is deferred until suitable original images are available for every
+style.
+
+`/lace` keeps one genuine business photograph as a static preview
+(`public/images/lace/selected-lace.jpg`, 1800×2400, 770,072 bytes). The former
+rotating photograph looked like a rigid card, so the customer page now uses an
+accessible 2D lightbox: select the image, zoom in without changing its aspect
+ratio, scroll to inspect embroidery, fit it again, and close with a button or
+Escape. The original photograph remains outside the project. It includes
+adjacent fabric rolls and tabletop; it is not a verified purchasable listing
+and no stock, price, composition, or fabric behavior is claimed. No Lace
+Pattern option has been added to the bag. Run the homepage and lace checks with
+`node scripts/verify-fashion-pages.mjs http://localhost:3104`.
+
+Measured on 2026-11-02 with a local production build, Playwright Chromium,
+375px CSS viewport, DPR 1, fresh browser contexts, and browser Resource Timing
+`transferSize` (network and cache conditions affect the observations):
+
+| Page | Initial transfer | Transfer after interaction | Added transfer |
+| --- | ---: | ---: | ---: |
+| Homepage | 345,544 B | — | — |
+| Bag Studio | 291,644 B | 540,037 B after 3D load | 248,393 B |
+| Lace | 324,252 B | 732,536 B after zoom | 408,284 B |
+
+At 375px the optimized hero rendition transferred 56,268 bytes. The homepage
+had a measured layout shift score of 0 and did not download the Bag Studio's
+viewer-specific JavaScript chunk. The WebGL 2 Bag Studio used Chromium
+SwiftShader software rendering and produced 22 render bursts over 931 ms in a
+scripted drag (22.5 bursts/s, **not** physical-device frames per second).
+Only the first visible hero image is preloaded; Next Image serves responsive
+renditions. The Bag Studio viewer bundle remains lazy until requested, and the
+lace zoom image loads only when its lightbox opens. These transfer and
+rendering observations vary with caching, browser, network, and hardware; they
+do not predict physical-mobile frame rate. The browser verifiers cover
+responsive homepage layout and links, lace zoom/keyboard access, Bag Studio
+controls, color, rotation, zoom, and fallbacks. Physical Safari, a screen
+reader, and a real mobile GPU still need review. With more time, measure on
+physical mobile devices and add the deferred six-style campaign carousel once
+original, approved images for every style are available. The local browser
+check intercepts WhatsApp navigation; it does not verify that the business
+number is registered on WhatsApp. The distinctions are **real WebGL 3D** in
+Bag Studio, a **2D editorial image** on the homepage, and **2D photographic
+zoom** on `/lace`.
