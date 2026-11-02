@@ -1,0 +1,45 @@
+.hero {
+  background: #1a1716;
+}
+
+.image {
+  object-position: center 8%;
+  transform: scale(1.02);
+  filter: saturate(1.08) contrast(1.04);
+}
+
+.overlay {
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    90deg,
+    rgba(13, 11, 10, 0.74) 0%,
+    rgba(13, 11, 10, 0.5) 26%,
+    rgba(13, 11, 10, 0.22) 58%,
+    rgba(13, 11, 10, 0.14) 100%
+  );
+}
+
+@media (max-width: 640px) {
+  .overlay {
+    background: linear-gradient(
+      180deg,
+      rgba(13, 11, 10, 0.62) 0%,
+      rgba(13, 11, 10, 0.52) 28%,
+      rgba(13, 11, 10, 0.1) 62%,
+      rgba(13, 11, 10, 0.52) 100%
+    );
+  }
+
+  .image {
+    object-position: center 26%;
+    transform: scale(1.08);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .image {
+    transform: none;
+    filter: none;
+  }
+}
