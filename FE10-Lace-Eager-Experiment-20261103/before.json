@@ -1,0 +1,162 @@
+{
+  "label": "Local production-build Chrome diagnostic, not Lighthouse or production",
+  "variant": "before",
+  "collectedAt": "2026-11-03T01:56:09.388Z",
+  "chromiumVersion": "156.0.8078.4",
+  "sourceRevision": "53f6bba plus uncommitted FE-10 accessibility changes",
+  "sourceHashes": {
+    "app/lace/lace-photo-zoom.tsx": "906c22b6c14b96f07c87e5a0ce4b125a492f8d8bd80a7b82394d0c8a6621e489",
+    "app/advisor/advisor-chat.tsx": "96d39831f11b67d0eab6064a68c5039ae66ca47b86f3b4243040d98836fcd71e",
+    "app/layout.tsx": "a578f116a6ea3ab320b7ec30948248b520467ac40f175a166df0a0dc38341fa3",
+    "app/globals.css": "4760bcffd11cde73c00cece9dde3adab72a2f5b52f895f5954ed9e391064e344",
+    "app/components/site-header.tsx": "7bd001ea6ce2189c113406ce2ec04c96d47ee106dbe57ef2e6717bcd47337da1"
+  },
+  "conditions": {
+    "viewport": {
+      "width": 412,
+      "height": 823,
+      "dpr": 1.75
+    },
+    "mobile": true,
+    "touch": true,
+    "cpuSlowdown": 4,
+    "latencyMs": 150,
+    "downloadBytesPerSecond": 204800,
+    "uploadBytesPerSecond": 84375,
+    "freshContextPerRun": true,
+    "cacheDisabled": true,
+    "serviceWorkersBlocked": true,
+    "localImageOptimizerWarmup": true
+  },
+  "lace": [
+    {
+      "index": 1,
+      "status": 200,
+      "loading": "lazy",
+      "fetchPriority": "high",
+      "imageNaturalWidth": 380,
+      "dialogImageBeforeOpen": false,
+      "imageRequest": {
+        "startTime": 808.5,
+        "responseStart": 824.3999999985099,
+        "responseEnd": 1784.6999999955297,
+        "transferSize": 127990,
+        "name": "http://localhost:3103/_next/image?url=%2Fimages%2Flace%2Fselected-lace.jpg&w=750&q=75"
+      },
+      "fcpMs": 828,
+      "lcp": {
+        "startTime": 1932,
+        "tag": "IMG",
+        "id": "",
+        "url": "http://localhost:3103/_next/image?url=%2Fimages%2Flace%2Fselected-lace.jpg&w=750&q=75"
+      },
+      "cls": 0,
+      "tbtProxyMs": 251,
+      "longTasks": [
+        {
+          "startTime": 1304.6999999955297,
+          "duration": 301
+        }
+      ],
+      "documentWidth": 412,
+      "viewportWidth": 412,
+      "dialogOpened": true,
+      "zoomed": true,
+      "focusRestored": true
+    },
+    {
+      "index": 2,
+      "status": 200,
+      "loading": "lazy",
+      "fetchPriority": "high",
+      "imageNaturalWidth": 380,
+      "dialogImageBeforeOpen": false,
+      "imageRequest": {
+        "startTime": 3819.5,
+        "responseStart": 3832,
+        "responseEnd": 4952.79999999702,
+        "transferSize": 127990,
+        "name": "http://localhost:3103/_next/image?url=%2Fimages%2Flace%2Fselected-lace.jpg&w=750&q=75"
+      },
+      "fcpMs": 3836,
+      "lcp": {
+        "startTime": 5124,
+        "tag": "IMG",
+        "id": "",
+        "url": "http://localhost:3103/_next/image?url=%2Fimages%2Flace%2Fselected-lace.jpg&w=750&q=75"
+      },
+      "cls": 0,
+      "tbtProxyMs": 122,
+      "longTasks": [
+        {
+          "startTime": 4486.79999999702,
+          "duration": 172
+        }
+      ],
+      "documentWidth": 412,
+      "viewportWidth": 412,
+      "dialogOpened": true,
+      "zoomed": true,
+      "focusRestored": true
+    },
+    {
+      "index": 3,
+      "status": 200,
+      "loading": "lazy",
+      "fetchPriority": "high",
+      "imageNaturalWidth": 380,
+      "dialogImageBeforeOpen": false,
+      "imageRequest": {
+        "startTime": 845.8999999985099,
+        "responseStart": 929.2999999970198,
+        "responseEnd": 1799.3999999985099,
+        "transferSize": 127990,
+        "name": "http://localhost:3103/_next/image?url=%2Fimages%2Flace%2Fselected-lace.jpg&w=750&q=75"
+      },
+      "fcpMs": 876,
+      "lcp": {
+        "startTime": 1932,
+        "tag": "IMG",
+        "id": "",
+        "url": "http://localhost:3103/_next/image?url=%2Fimages%2Flace%2Fselected-lace.jpg&w=750&q=75"
+      },
+      "cls": 0,
+      "tbtProxyMs": 223,
+      "longTasks": [
+        {
+          "startTime": 1306.1000000014901,
+          "duration": 270
+        },
+        {
+          "startTime": 1779.6000000014901,
+          "duration": 53
+        }
+      ],
+      "documentWidth": 412,
+      "viewportWidth": 412,
+      "dialogOpened": true,
+      "zoomed": true,
+      "focusRestored": true
+    }
+  ],
+  "transitions": [
+    {
+      "index": 1,
+      "headingMs": 432,
+      "imageReadyMs": 1213,
+      "url": "http://localhost:3103/lace"
+    },
+    {
+      "index": 2,
+      "headingMs": 1279,
+      "imageReadyMs": 2211,
+      "url": "http://localhost:3103/lace"
+    },
+    {
+      "index": 3,
+      "headingMs": 526,
+      "imageReadyMs": 1445,
+      "url": "http://localhost:3103/lace"
+    }
+  ]
+}

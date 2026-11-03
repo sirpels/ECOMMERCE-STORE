@@ -1,6 +1,6 @@
-import { act, render, screen, within } from "@testing-library/react";
+import { act, fireEvent, render, screen, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import AdvisorChat from "../../app/advisor/advisor-chat";
 import FabricGuidanceResult, { type FabricGuidancePart } from "../../app/advisor/fabric-guidance-result";
 import { FABRIC_GUIDANCE_DISCLAIMER } from "../../lib/ai/fabric-guidance";
@@ -63,6 +63,7 @@ beforeEach(() => {
   chat.onFinish = null;
   chat.onError = null;
 });
+afterEach(() => vi.useRealTimers());
 
 describe("Advisor conversation and composer", () => {
   it("renders actual user and assistant text parts in named articles", () => {
@@ -88,6 +89,65 @@ describe("Advisor conversation and composer", () => {
     expect(within(screen.getByRole("article", { name: "Advisor response" })).getByText("A first streamed sentence")).toBeVisible();
     expect(screen.queryByText("Advisor is thinking…")).not.toBeInTheDocument();
     expect(screen.getByRole("button", { name: "Stop" })).toBeEnabled();
+  });
+
+  it("announces new answer batches, not the whole growing response, and drops queued text on Stop", async () => {
+    vi.useFakeTimers();
+    chat.messages = [message("u1", "user", "Help")];
+    chat.status = "submitted";
+    const view = render(<AdvisorChat />);
+    const announcement = screen.getByTestId("answer-announcement");
+    chat.messages = [...chat.messages, message("a1", "assistant", "Cotton is one option. ")];
+    chat.status = "streaming";
+    view.rerender(<AdvisorChat />);
+    expect(announcement).toHaveTextContent("");
+    act(() => vi.advanceTimersByTime(1500));
+    expect(announcement).toHaveTextContent("Cotton is one option.");
+
+    chat.messages = [chat.messages[0], message("a1", "assistant", "Cotton is one option. Linen can also work. ")];
+    view.rerender(<AdvisorChat />);
+    act(() => vi.advanceTimersByTime(1500));
+    expect(announcement).toHaveTextContent("Linen can also work.");
+    expect(announcement).not.toHaveTextContent("Cotton is one option.");
+
+    chat.messages = [chat.messages[0], message("a1", "assistant", "Cotton is one option. Linen can also work. A final idea. ")];
+    view.rerender(<AdvisorChat />);
+    await act(async () => { fireEvent.click(screen.getByRole("button", { name: "Stop" })); });
+    act(() => vi.advanceTimersByTime(3000));
+    expect(announcement).toHaveTextContent("");
+    expect(chat.stop).toHaveBeenCalledOnce();
+  });
+
+  it("flushes a short final answer on completion and suppresses queued text after an error", () => {
+    vi.useFakeTimers();
+    const user = message("u1", "user", "Help");
+    chat.messages = [user];
+    chat.status = "submitted";
+    const view = render(<AdvisorChat />);
+    const announcement = screen.getByTestId("answer-announcement");
+    const answer = message("a1", "assistant", "Brief answer");
+    chat.messages = [user, answer];
+    chat.status = "streaming";
+    view.rerender(<AdvisorChat />);
+    act(() => vi.advanceTimersByTime(1500));
+    expect(announcement).toHaveTextContent("");
+    chat.status = "ready";
+    act(() => chat.onFinish?.({ message: answer, messages: chat.messages, isAbort: false, isError: false, finishReason: "stop" }));
+    view.rerender(<AdvisorChat />);
+    act(() => vi.advanceTimersByTime(0));
+    expect(announcement).toHaveTextContent("Brief answer");
+
+    const nextUser = message("u2", "user", "Another question");
+    chat.messages = [user, answer, nextUser];
+    chat.status = "submitted";
+    view.rerender(<AdvisorChat />);
+    const partial = message("a2", "assistant", "This answer should not be announced. ");
+    chat.messages = [user, answer, nextUser, partial];
+    chat.status = "streaming";
+    view.rerender(<AdvisorChat />);
+    act(() => chat.onError?.(new Error("Connection lost")));
+    act(() => vi.advanceTimersByTime(3000));
+    expect(announcement).toHaveTextContent("");
   });
 
   it("keeps partial text and retries only the failed response", async () => {

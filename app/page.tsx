@@ -15,7 +15,7 @@ export default function HomePage() {
       <div className="relative min-h-[58vh] sm:min-h-[64vh] lg:min-h-[76vh]">
         <Image
           src="/images/hero/editorial-lace-concept.webp"
-          alt="Illustrative editorial fashion image showing a woman in an embroidered lace outfit and matching headwrap."
+          alt="Illustrative image of a woman in embroidered lace with a matching headwrap."
           fill
           preload
           sizes="100vw"
