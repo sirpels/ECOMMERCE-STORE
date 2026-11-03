@@ -22,8 +22,6 @@ jobs:
       GOOGLE_GENERATIVE_AI_API_KEY: ""
       VERCEL: ""
       NEXT_TELEMETRY_DISABLED: "1"
-      FE10_AUDIT_OUTPUT: ${{ runner.temp }}/fe10-audit-results
-      FE10_LIGHTHOUSE_CLI: ${{ runner.temp }}/fe10-lighthouse/node_modules/lighthouse/cli/index.js
     steps:
       - uses: actions/checkout@v4
         with:
@@ -34,6 +32,11 @@ jobs:
         with:
           node-version: 22.22.0
           cache: npm
+      - name: Set temporary audit paths
+        shell: bash
+        run: |
+          echo "FE10_AUDIT_OUTPUT=$RUNNER_TEMP/fe10-audit-results" >> "$GITHUB_ENV"
+          echo "FE10_LIGHTHOUSE_CLI=$RUNNER_TEMP/fe10-lighthouse/node_modules/lighthouse/cli/index.js" >> "$GITHUB_ENV"
       - name: Install pinned candidate and audit tools
         run: |
           npm ci
