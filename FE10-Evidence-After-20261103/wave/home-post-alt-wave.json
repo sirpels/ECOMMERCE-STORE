@@ -1,0 +1,12 @@
+{
+  "scenario": "/",
+  "url": "http://localhost:3112/",
+  "sourceCommit": "71ee99889367513cb2ac66357b1fdaa612e9282f",
+  "build": "isolated webpack production build for WAVE only",
+  "waveExtensionVersion": "3.3.1.0",
+  "scannedAt": "2026-11-04T11:15:31.206Z",
+  "errors": "0",
+  "contrast": "0",
+  "alerts": "0",
+  "findings": "4 Features\n1 Alternative text\n1 Skip link\n1 Skip link target\n1 Language\n6 Structural Elements\n1 Heading level 1\n1 Header\n2 Navigation\n1 Main content\n1 Footer\n6 ARIA\n4 ARIA label\n1 ARIA tabindex\n1 ARIA hidden"
+}

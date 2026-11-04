@@ -1,0 +1,12 @@
+{
+  "scenario": "/advisor-error",
+  "url": "http://localhost:3112/advisor",
+  "sourceCommit": "71ee99889367513cb2ac66357b1fdaa612e9282f",
+  "build": "isolated production UI with proxied development-only recovery fixture; not Gemini",
+  "waveExtensionVersion": "3.3.1.0",
+  "scannedAt": "2026-11-04T11:14:53.295Z",
+  "errors": "0",
+  "contrast": "0",
+  "alerts": "0",
+  "findings": "4 Features\n1 Form label\n1 Skip link\n1 Skip link target\n1 Language\n15 Structural Elements\n1 Heading level 1\n1 Heading level 2\n2 Heading level 3\n3 Heading level 4\n1 Unordered list\n1 Definition/description list\n1 Header\n2 Navigation\n1 Main content\n1 Footer\n1 Generic region\n16 ARIA\n2 ARIA\n8 ARIA label\n1 ARIA description\n2 ARIA tabindex\n3 ARIA alert or live region"
+}
