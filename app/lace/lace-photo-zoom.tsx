@@ -35,6 +35,7 @@ export function LacePhotoZoom() {
           alt={laceAlt}
           fill
           sizes="(max-width: 768px) calc(100vw - 2rem), 50vw"
+          loading="eager"
           fetchPriority="high"
           className="object-contain transition-transform duration-300 motion-reduce:transition-none group-hover:scale-[1.01] motion-reduce:group-hover:scale-100"
         />

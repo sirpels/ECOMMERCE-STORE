@@ -6,5 +6,5 @@ import "./globals.css";
 export const metadata: Metadata = { title: { default: "Atelier Placeholder", template: "%s | Atelier Placeholder" }, description: "Initial storefront skeleton for a fashion business." };
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
-  return <html lang="en"><body><SiteHeader /><main className="site-main">{children}</main><SiteFooter /></body></html>;
+  return <html lang="en"><body><a href="#main-content" className="skip-link">Skip to main content</a><SiteHeader /><main id="main-content" tabIndex={-1} className="site-main">{children}</main><SiteFooter /></body></html>;
 }

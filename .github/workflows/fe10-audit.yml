@@ -1,0 +1,102 @@
+name: FE-10 hosted Lighthouse comparison
+
+on:
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+    inputs:
+      preview_url:
+        description: Optional existing Vercel preview URL for separate mobile audits
+        required: false
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  audit:
+    name: matched-mobile-lighthouse
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      GOOGLE_GENERATIVE_AI_API_KEY: ""
+      VERCEL: ""
+      NEXT_TELEMETRY_DISABLED: "1"
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.pull_request.head.sha || github.sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22.22.0
+          cache: npm
+      - name: Set temporary audit paths
+        shell: bash
+        run: |
+          echo "FE10_AUDIT_OUTPUT=$RUNNER_TEMP/fe10-audit-results" >> "$GITHUB_ENV"
+          echo "FE10_LIGHTHOUSE_CLI=$RUNNER_TEMP/fe10-lighthouse/node_modules/lighthouse/cli/index.js" >> "$GITHUB_ENV"
+      - name: Install pinned candidate and audit tools
+        run: |
+          npm ci
+          npx playwright install --with-deps chromium
+          npm install --prefix "$RUNNER_TEMP/fe10-lighthouse" --no-save --ignore-scripts lighthouse@13.5.0
+          node --version
+          node -p "require('@playwright/test/package.json').version"
+          node -e "const {chromium}=require('@playwright/test');const {execFileSync}=require('node:child_process');console.log(execFileSync(chromium.executablePath(),['--version'],{encoding:'utf8'}).trim())"
+          node "$FE10_LIGHTHOUSE_CLI" --version
+      - name: Build and audit unchanged released source
+        shell: bash
+        run: |
+          set -euo pipefail
+          git worktree add --detach "$RUNNER_TEMP/fe10-released" 53f6bba27bba17d2d98c32be2a797051d8d2dd53
+          cd "$RUNNER_TEMP/fe10-released"
+          npm ci
+          npm run build
+          if find .next/static -name '*.map' -print -quit | grep -q .; then exit 1; fi
+          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3105 > "$RUNNER_TEMP/fe10-released-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in {1..60}; do
+            if curl --silent --fail http://127.0.0.1:3105/ > /dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then exit 1; fi
+          FE10_SOURCE_REVISION=53f6bba27bba17d2d98c32be2a797051d8d2dd53 \
+            node "$GITHUB_WORKSPACE/scripts/fe10-hosted-audit.mjs" released http://127.0.0.1:3105
+      - name: Build and audit FE-10 candidate
+        shell: bash
+        run: |
+          set -euo pipefail
+          npm run build
+          if find .next/static -name '*.map' -print -quit | grep -q .; then exit 1; fi
+          node node_modules/next/dist/bin/next start --hostname 127.0.0.1 --port 3106 > "$RUNNER_TEMP/fe10-candidate-server.log" 2>&1 &
+          server_pid=$!
+          trap 'kill "$server_pid" 2>/dev/null || true' EXIT
+          ready=0
+          for attempt in {1..60}; do
+            if curl --silent --fail http://127.0.0.1:3106/ > /dev/null; then ready=1; break; fi
+            sleep 1
+          done
+          if [ "$ready" -ne 1 ]; then exit 1; fi
+          FE10_SOURCE_REVISION="$(git rev-parse HEAD)" \
+            node scripts/fe10-hosted-audit.mjs candidate http://127.0.0.1:3106
+      - name: Audit existing Vercel preview separately when supplied
+        if: ${{ github.event_name == 'workflow_dispatch' && inputs.preview_url != '' }}
+        shell: bash
+        env:
+          FE10_PREVIEW_URL: ${{ inputs.preview_url }}
+        run: |
+          set -euo pipefail
+          FE10_SOURCE_REVISION="$(git rev-parse HEAD)" \
+            node scripts/fe10-hosted-audit.mjs preview "$FE10_PREVIEW_URL"
+      - name: Upload all reports, scores, settings and warnings
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: fe10-hosted-lighthouse
+          path: ${{ runner.temp }}/fe10-audit-results/
+          if-no-files-found: warn
+          retention-days: 14

@@ -1,0 +1,166 @@
+{
+  "label": "Local development-only slow fixture; not Gemini or production",
+  "checks": [
+    {
+      "name": "Home fits 375px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Skip link receives first focus",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Skip link is visible while focused",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Skip focuses main",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Next Tab reaches Explore Lace",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Keyboard navigation reaches Lace",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Lace dialog opens by keyboard",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Lace dialog restores focus",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Keyboard navigation reaches Advisor",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Stop available during fixture generation",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Stop restores usable composer focus",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Question remains visible after Stop",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Tailoring enquiry link is keyboard reachable without sending",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Tailoring enquiry opens a new tab",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/ fits 320px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/lace fits 320px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/advisor fits 320px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/bag-studio fits 320px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/ fits 375px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/lace fits 375px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/advisor fits 375px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/bag-studio fits 375px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/ fits 768px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/lace fits 768px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/advisor fits 768px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/bag-studio fits 768px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/ fits 1280px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/lace fits 1280px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/advisor fits 1280px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "/bag-studio fits 1280px",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "Bag Studio color remains selectable",
+      "passed": true,
+      "detail": ""
+    },
+    {
+      "name": "No uncaught browser page errors",
+      "passed": true,
+      "detail": ""
+    }
+  ],
+  "errors": []
+}

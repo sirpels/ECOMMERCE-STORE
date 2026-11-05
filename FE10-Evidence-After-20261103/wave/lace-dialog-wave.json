@@ -1,0 +1,12 @@
+{
+  "scenario": "/lace",
+  "url": "http://localhost:3112/lace",
+  "sourceCommit": "71ee99889367513cb2ac66357b1fdaa612e9282f",
+  "build": "isolated webpack production build for WAVE only",
+  "waveExtensionVersion": "3.3.1.0",
+  "scannedAt": "2026-11-04T20:11:32.381Z",
+  "errors": "0",
+  "contrast": "0",
+  "alerts": "0",
+  "findings": "5 Features\n2 Alternative text\n1 Skip link\n1 Skip link target\n1 Language\n7 Structural Elements\n1 Heading level 1\n1 Heading level 2\n1 Header\n2 Navigation\n1 Main content\n1 Footer\n8 ARIA\n6 ARIA label\n2 ARIA tabindex"
+}

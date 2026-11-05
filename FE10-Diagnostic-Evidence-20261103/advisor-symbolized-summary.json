@@ -1,0 +1,350 @@
+{
+  "collectedAt": "2026-11-03T03:12:58.013Z",
+  "url": "http://127.0.0.1:3104/advisor",
+  "buildDir": "C:\\Users\\user\\AppData\\Local\\Temp\\FE10-Diagnostic-20261103-040524",
+  "sourceHashes": {
+    "app/advisor/advisor-chat.tsx": "96d39831f11b67d0eab6064a68c5039ae66ca47b86f3b4243040d98836fcd71e",
+    "app/layout.tsx": "a578f116a6ea3ab320b7ec30948248b520467ac40f175a166df0a0dc38341fa3",
+    "app/page.tsx": "222420c8f43e9d508019ae5619e308f565d56a54fa94e3ecb838ba8148230b13",
+    "next.config.ts": "8dd6d87de668220bc7f627c44b61bbae737cc4f619b92b0f27fcd6ef0594c1d7"
+  },
+  "viewport": "412x823 CSS px, DPR 1.75, touch",
+  "throttling": "4x CPU; 150 ms latency; 204800 B/s down; 84375 B/s up; cache disabled",
+  "note": "One local production-build CPU profile with browser source maps; sampled self time, not Lighthouse TBT.",
+  "samples": 3107,
+  "mappedSamples": 269,
+  "topSources": [
+    {
+      "source": "turbopack:///[turbopack]/browser/runtime/base/build-base.ts",
+      "sampledSelfMs": 193
+    },
+    {
+      "source": "",
+      "sampledSelfMs": 160
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+      "sampledSelfMs": 103
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/shared/lib/router/utils/cache-busting-search-param.ts",
+      "sampledSelfMs": 85
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/core/util.js",
+      "sampledSelfMs": 48
+    },
+    {
+      "source": "turbopack:///[turbopack]/browser/runtime/dom/runtime-backend-dom.ts",
+      "sampledSelfMs": 31
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/scheduler.ts",
+      "sampledSelfMs": 29
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/core/core.js",
+      "sampledSelfMs": 27
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.browser.production.js",
+      "sampledSelfMs": 25
+    },
+    {
+      "source": "http://127.0.0.1:3104/_next/static/chunks/turbopack-0hk-bigsin20q.js",
+      "sampledSelfMs": 16
+    },
+    {
+      "source": "http://127.0.0.1:3104/_next/static/chunks/3acpo2j6ybnw0.js",
+      "sampledSelfMs": 15
+    },
+    {
+      "source": "turbopack:///[turbopack]/shared/runtime/runtime-utils.ts",
+      "sampledSelfMs": 15
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/cache.ts",
+      "sampledSelfMs": 15
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/decode-server-response.ts",
+      "sampledSelfMs": 10
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/router-reducer/fetch-server-response.ts",
+      "sampledSelfMs": 10
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/set-attributes-from-props.ts",
+      "sampledSelfMs": 10
+    },
+    {
+      "source": "turbopack:///[turbopack]/browser/runtime/base/runtime-base.ts",
+      "sampledSelfMs": 8
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/core/schemas.js",
+      "sampledSelfMs": 8
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/classic/schemas.js",
+      "sampledSelfMs": 7
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/links.ts",
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/app-index.tsx",
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/client.js",
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/error-boundary.tsx",
+      "sampledSelfMs": 5
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/@ai-sdk/provider-utils/src/generate-id.ts",
+      "sampledSelfMs": 4
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/buffer/index.js",
+      "sampledSelfMs": 4
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/lru.ts",
+      "sampledSelfMs": 4
+    },
+    {
+      "source": "http://127.0.0.1:3104/advisor",
+      "sampledSelfMs": 4
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/cache-map.ts",
+      "sampledSelfMs": 4
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/build/polyfills/process.ts",
+      "sampledSelfMs": 4
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/shared/lib/router/utils/is-bot.ts",
+      "sampledSelfMs": 4
+    }
+  ],
+  "topFrames": [
+    {
+      "source": "turbopack:///[turbopack]/browser/runtime/base/build-base.ts",
+      "functionName": "instantiateModule",
+      "line": 48,
+      "sampledSelfMs": 187
+    },
+    {
+      "source": "",
+      "functionName": "(garbage collector)",
+      "line": 0,
+      "sampledSelfMs": 129
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/shared/lib/router/utils/cache-busting-search-param.ts",
+      "functionName": "computeCacheBustingSearchParamFromInput",
+      "line": 47,
+      "sampledSelfMs": 85
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+      "functionName": "beginWork",
+      "line": 7771,
+      "sampledSelfMs": 36
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/scheduler.ts",
+      "functionName": "pingPrefetchScheduler",
+      "line": 469,
+      "sampledSelfMs": 29
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/core/util.js",
+      "functionName": "tn",
+      "line": 732,
+      "sampledSelfMs": 27
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/core/core.js",
+      "functionName": "o",
+      "line": 50,
+      "sampledSelfMs": 23
+    },
+    {
+      "source": "turbopack:///[turbopack]/browser/runtime/dom/runtime-backend-dom.ts",
+      "functionName": "getOrCreateResolver",
+      "line": 82,
+      "sampledSelfMs": 19
+    },
+    {
+      "source": "http://127.0.0.1:3104/_next/static/chunks/turbopack-0hk-bigsin20q.js",
+      "functionName": "",
+      "line": 1,
+      "sampledSelfMs": 16
+    },
+    {
+      "source": "http://127.0.0.1:3104/_next/static/chunks/3acpo2j6ybnw0.js",
+      "functionName": "",
+      "line": 1,
+      "sampledSelfMs": 15
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+      "functionName": "shouldConstruct",
+      "line": 2667,
+      "sampledSelfMs": 13
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+      "functionName": "renderWithHooks",
+      "line": 4630,
+      "sampledSelfMs": 11
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/set-attributes-from-props.ts",
+      "functionName": "",
+      "line": 59,
+      "sampledSelfMs": 10
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+      "functionName": "setInitialProperties",
+      "line": 14814,
+      "sampledSelfMs": 9
+    },
+    {
+      "source": "",
+      "functionName": "setTimeout",
+      "line": 0,
+      "sampledSelfMs": 9
+    },
+    {
+      "source": "turbopack:///[turbopack]/shared/runtime/runtime-utils.ts",
+      "functionName": "installCompressedModuleFactories",
+      "line": 722,
+      "sampledSelfMs": 9
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/router-reducer/fetch-server-response.ts",
+      "functionName": "createFetch",
+      "line": 718,
+      "sampledSelfMs": 8
+    },
+    {
+      "source": "",
+      "functionName": "createElement",
+      "line": 0,
+      "sampledSelfMs": 8
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/core/util.js",
+      "functionName": "",
+      "line": 770,
+      "sampledSelfMs": 8
+    },
+    {
+      "source": "turbopack:///[turbopack]/browser/runtime/dom/runtime-backend-dom.ts",
+      "functionName": "registerChunk",
+      "line": 38,
+      "sampledSelfMs": 7
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/decode-server-response.ts",
+      "functionName": "readFulfilledStaleTimeSeconds",
+      "line": 686,
+      "sampledSelfMs": 7
+    },
+    {
+      "source": "",
+      "functionName": "fetch",
+      "line": 0,
+      "sampledSelfMs": 7
+    },
+    {
+      "source": "turbopack:///[turbopack]/browser/runtime/base/runtime-base.ts",
+      "functionName": "getChunkRelativeUrl",
+      "line": 490,
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/links.ts",
+      "functionName": "observeVisibility",
+      "line": 129,
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/cache.ts",
+      "functionName": "fetchAndWritePerSegmentPrefetchResponse",
+      "line": 2187,
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+      "functionName": "completeUnitOfWork",
+      "line": 12821,
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/core/util.js",
+      "functionName": "tc",
+      "line": 804,
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/client.js",
+      "functionName": "",
+      "line": 35,
+      "sampledSelfMs": 6
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.browser.production.js",
+      "functionName": "progress",
+      "line": 1956,
+      "sampledSelfMs": 5
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-server-dom-turbopack/cjs/react-server-dom-turbopack-client.browser.production.js",
+      "functionName": "initializeModuleChunk",
+      "line": 855,
+      "sampledSelfMs": 5
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/dist/compiled/react-dom/cjs/react-dom-client.production.js",
+      "functionName": "getResource",
+      "line": 17187,
+      "sampledSelfMs": 5
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/error-boundary.tsx",
+      "functionName": "constructor",
+      "line": 49,
+      "sampledSelfMs": 5
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/next/src/client/components/segment-cache/cache.ts",
+      "functionName": "writeRouteIntoCache",
+      "line": 1579,
+      "sampledSelfMs": 5
+    },
+    {
+      "source": "turbopack:///[turbopack]/browser/runtime/base/build-base.ts",
+      "functionName": "registerChunk",
+      "line": 87,
+      "sampledSelfMs": 5
+    },
+    {
+      "source": "turbopack:///[project]/node_modules/zod/v4/core/util.js",
+      "functionName": "error",
+      "line": 218,
+      "sampledSelfMs": 4
+    }
+  ]
+}

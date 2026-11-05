@@ -39,15 +39,33 @@ export default function AdvisorChat() {
   const requestLock = useRef(false);
   const intentionalStop = useRef(false);
   const pendingError = useRef<AdvisorFailure | null>(null);
+  const [answerAnnouncement, setAnswerAnnouncement] = useState("");
+  const announcementTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const announcementMessageId = useRef<string | null>(null);
+  const announcedThrough = useRef(0);
+  const announcementInitialized = useRef(false);
+  const suppressAnnouncement = useRef(false);
+  const latestAnswer = useRef("");
+  const answerStillStreaming = useRef(false);
   const { messages, sendMessage, regenerate, status, stop, clearError } = useChat<AdvisorMessage>({
     transport,
     resume: false,
-    onError(error) { pendingError.current = classifyAdvisorError(error, !navigator.onLine); },
+    onError(error) {
+      pendingError.current = classifyAdvisorError(error, !navigator.onLine);
+      suppressAnnouncement.current = true;
+      if (announcementTimer.current) clearTimeout(announcementTimer.current);
+      announcementTimer.current = null;
+      setAnswerAnnouncement("");
+    },
     onFinish({ message, messages: history, isAbort, isError, finishReason }) {
       setSlow(false);
       const user = history.findLast(item => item.role === "user");
       if (!user) return;
       if (intentionalStop.current || isAbort) {
+        suppressAnnouncement.current = true;
+        if (announcementTimer.current) clearTimeout(announcementTimer.current);
+        announcementTimer.current = null;
+        setAnswerAnnouncement("");
         setOutcomes(previous => ({ ...previous, [message.id]: "stopped" }));
         setFailedTurn(null);
         setCompletionNotice("Response stopped. You can send another question.");
@@ -60,6 +78,10 @@ export default function AdvisorChat() {
         finishReason === undefined || finishReason === "error" ? { code: "stream" } :
         !answered ? { code: "empty" } : null;
       if (failure) {
+        suppressAnnouncement.current = true;
+        if (announcementTimer.current) clearTimeout(announcementTimer.current);
+        announcementTimer.current = null;
+        setAnswerAnnouncement("");
         setNow(Date.now());
         setOutcomes(previous => ({ ...previous, [message.id]: "interrupted" }));
         setFailedTurn({ userId: user.id, targetId: history.some(item => item.id === message.id) ? message.id : user.id, failure });
@@ -85,11 +107,66 @@ export default function AdvisorChat() {
   const hasPartialResponse = !!retrySnapshot || messages.some(message => message.id === currentFailure?.targetId && message.role === "assistant" && hasContent(message));
   const cooldown = Math.max(0, Math.ceil(((currentFailure?.failure.retryAt ?? 0) - now) / 1000));
   const lastMessage = messages.at(-1);
+  const answerText = lastMessage?.role === "assistant"
+    ? lastMessage.parts.filter(part => part.type === "text").map(part => part.text).join("") : "";
   const hasResponseText = lastMessage?.role === "assistant" &&
     lastMessage.parts.some((part) => part.type === "text" && part.text.length > 0);
   const hasToolPart = lastMessage?.role === "assistant" &&
     lastMessage.parts.some((part) => part.type === "tool-findFabricGuidance");
   const thinking = busy && !hasResponseText && !hasToolPart;
+
+  useEffect(() => {
+    latestAnswer.current = answerText;
+    answerStillStreaming.current = busy;
+    const responseId = lastMessage?.role === "assistant" ? lastMessage.id : null;
+    if (!announcementInitialized.current) {
+      announcementInitialized.current = true;
+      // Existing history is already visible; announce only a newly generated answer.
+      if (!busy) {
+        announcementMessageId.current = responseId;
+        announcedThrough.current = answerText.length;
+        return;
+      }
+    }
+    if (responseId !== announcementMessageId.current) {
+      if (announcementTimer.current) clearTimeout(announcementTimer.current);
+      announcementTimer.current = null;
+      announcementMessageId.current = responseId;
+      announcedThrough.current = 0;
+      setAnswerAnnouncement("");
+    } else if (answerText.length < announcedThrough.current) {
+      // A regenerated response can reuse an ID while replacing its previous text.
+      announcedThrough.current = 0;
+    }
+    if (!responseId || suppressAnnouncement.current || status === "error" || intentionalStop.current) return;
+
+    function schedule(delay = 1500) {
+      if (announcementTimer.current || suppressAnnouncement.current) return;
+      announcementTimer.current = setTimeout(() => {
+        announcementTimer.current = null;
+        if (suppressAnnouncement.current || intentionalStop.current) return;
+        const remaining = latestAnswer.current.slice(announcedThrough.current);
+        if (!remaining) return;
+        const candidate = remaining.slice(0, 200);
+        const sentence = /[.!?](?:\s|$)|\n/.exec(candidate);
+        let end = sentence ? sentence.index + 1 : 0;
+        if (!end && remaining.length >= 180) {
+          end = candidate.lastIndexOf(" ", 180);
+          if (end < 80) end = 180;
+        }
+        if (!end && !answerStillStreaming.current) end = remaining.length;
+        if (!end) return; // Wait for a sentence, a useful text batch, or completion.
+        const batch = remaining.slice(0, end).trim();
+        announcedThrough.current += end;
+        if (batch) setAnswerAnnouncement(batch);
+        if (latestAnswer.current.length > announcedThrough.current) schedule();
+      }, delay);
+    }
+    if (answerText.length > announcedThrough.current) schedule(busy ? 1500 : 0);
+  }, [answerText, busy, lastMessage?.id, lastMessage?.role, status]);
+  useEffect(() => () => {
+    if (announcementTimer.current) clearTimeout(announcementTimer.current);
+  }, []);
 
   useEffect(() => {
     const update = () => setOnline(navigator.onLine);
@@ -129,6 +206,12 @@ export default function AdvisorChat() {
     requestLock.current = true; // Synchronous: two clicks in one render cannot race.
     intentionalStop.current = false;
     pendingError.current = null;
+    suppressAnnouncement.current = false;
+    if (announcementTimer.current) clearTimeout(announcementTimer.current);
+    announcementTimer.current = null;
+    announcementMessageId.current = lastMessage?.role === "assistant" ? lastMessage.id : null;
+    announcedThrough.current = answerText.length;
+    setAnswerAnnouncement("");
     setCompletionNotice(null);
     setSlow(false);
     clearError();
@@ -202,6 +285,10 @@ export default function AdvisorChat() {
   async function stopResponse() {
     if (stopping) return;
     intentionalStop.current = true;
+    suppressAnnouncement.current = true;
+    if (announcementTimer.current) clearTimeout(announcementTimer.current);
+    announcementTimer.current = null;
+    setAnswerAnnouncement("");
     setStopping(true);
     try {
       // SDK stop aborts fetch and keeps all received message parts.
@@ -214,6 +301,7 @@ export default function AdvisorChat() {
 
   return (
     <div className="mt-6 max-w-3xl overflow-hidden rounded-card border border-border bg-surface">
+      <span aria-live="polite" aria-atomic="true" className="sr-only" data-testid="answer-announcement">{answerAnnouncement}</span>
       <h2 id="conversation-title" className="border-b border-border px-4 py-3 font-semibold sm:px-6">Your conversation</h2>
       <div
         ref={viewportRef}
