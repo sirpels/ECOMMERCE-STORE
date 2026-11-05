@@ -1,0 +1,11 @@
+{
+  "scenario": "lace-dialog",
+  "url": "https://ecommerce-store-gamma-sable.vercel.app/lace",
+  "productionCommit": "e5bd6d5eec9be772d74102d8b8a8b7ce865df7b2",
+  "waveExtensionVersion": "3.3.1.0",
+  "scannedAt": "2026-11-05T03:51:26.894Z",
+  "errors": "0",
+  "contrastErrors": "0",
+  "alerts": "0",
+  "findings": "5 Features\n2 Alternative text\n1 Skip link\n1 Skip link target\n1 Language\n7 Structural Elements\n1 Heading level 1\n1 Heading level 2\n1 Header\n2 Navigation\n1 Main content\n1 Footer\n8 ARIA\n6 ARIA label\n2 ARIA tabindex"
+}
