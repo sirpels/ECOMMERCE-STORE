@@ -1,0 +1,11 @@
+{
+  "scenario": "advisor-initial",
+  "url": "https://ecommerce-store-gamma-sable.vercel.app/advisor",
+  "productionCommit": "e5bd6d5eec9be772d74102d8b8a8b7ce865df7b2",
+  "waveExtensionVersion": "3.3.1.0",
+  "scannedAt": "2026-11-05T03:53:12.122Z",
+  "errors": "0",
+  "contrastErrors": "0",
+  "alerts": "0",
+  "findings": "4 Features\n1 Form label\n1 Skip link\n1 Skip link target\n1 Language\n8 Structural Elements\n1 Heading level 1\n1 Heading level 2\n1 Header\n2 Navigation\n1 Main content\n1 Footer\n1 Generic region\n11 ARIA\n2 ARIA\n4 ARIA label\n1 ARIA description\n2 ARIA tabindex\n2 ARIA alert or live region"
+}

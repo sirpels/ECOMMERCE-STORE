@@ -1,0 +1,65 @@
+{
+  "testedAt": "2026-11-05T03:40:04.204Z",
+  "baseUrl": "https://ecommerce-store-gamma-sable.vercel.app",
+  "viewport": {
+    "width": 375,
+    "height": 812
+  },
+  "routes": {
+    "/": {
+      "status": 200,
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "noHorizontalOverflow": true
+    },
+    "/lace-after-dialog": {
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "noHorizontalOverflow": true
+    },
+    "/advisor": {
+      "status": 200,
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "noHorizontalOverflow": true
+    },
+    "/bag-studio": {
+      "status": 200,
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "noHorizontalOverflow": true,
+      "headingVisible": true
+    },
+    "/health": {
+      "status": 200,
+      "innerWidth": 375,
+      "scrollWidth": 375,
+      "noHorizontalOverflow": true
+    }
+  },
+  "keyboard": {
+    "skipLinkFocused": true,
+    "skipLinkVisible": true,
+    "mainFocused": true,
+    "nextAfterMain": "Explore Lace",
+    "laceDialogOpened": true,
+    "laceDialogClosed": true,
+    "laceFocusRestored": true,
+    "advisorComposerFocused": true,
+    "sendReachable": true
+  },
+  "advisor": {
+    "requestSubmitted": true,
+    "stopBecameVisible": true,
+    "visibleResponseText": false,
+    "composerUsableAfterRequest": true
+  },
+  "whatsapp": {
+    "host": "wa.me",
+    "hasNumericDestination": true,
+    "hasPrefilledMessage": true,
+    "target": "_blank"
+  },
+  "consoleErrors": [],
+  "pageErrors": []
+}

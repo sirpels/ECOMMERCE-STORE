@@ -1,0 +1,107 @@
+{
+  "home": {
+    "metrics": {
+      "performance": {
+        "median": 99,
+        "min": 97,
+        "max": 99
+      },
+      "accessibility": {
+        "median": 100,
+        "min": 100,
+        "max": 100
+      },
+      "fcpMs": {
+        "median": 796.0615,
+        "min": 792.318,
+        "max": 904.3154999999999
+      },
+      "lcpMs": {
+        "median": 2003.3154999999997,
+        "min": 1963.0615,
+        "max": 2030.318
+      },
+      "tbtMs": {
+        "median": 92.00000000000011,
+        "min": 77.5,
+        "max": 161
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "warnings": []
+  },
+  "lace": {
+    "metrics": {
+      "performance": {
+        "median": 96,
+        "min": 96,
+        "max": 96
+      },
+      "accessibility": {
+        "median": 100,
+        "min": 100,
+        "max": 100
+      },
+      "fcpMs": {
+        "median": 791.62,
+        "min": 786.6845,
+        "max": 801.4665
+      },
+      "lcpMs": {
+        "median": 2343.62,
+        "min": 2334.6845,
+        "max": 2353.4665
+      },
+      "tbtMs": {
+        "median": 169,
+        "min": 165,
+        "max": 173.5
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "warnings": []
+  },
+  "advisor": {
+    "metrics": {
+      "performance": {
+        "median": 94,
+        "min": 93,
+        "max": 94
+      },
+      "accessibility": {
+        "median": 100,
+        "min": 100,
+        "max": 100
+      },
+      "fcpMs": {
+        "median": 790.691,
+        "min": 790.095,
+        "max": 800.78
+      },
+      "lcpMs": {
+        "median": 1961.78,
+        "min": 1854.691,
+        "max": 2006.095
+      },
+      "tbtMs": {
+        "median": 279,
+        "min": 271,
+        "max": 303
+      },
+      "cls": {
+        "median": 0,
+        "min": 0,
+        "max": 0
+      }
+    },
+    "warnings": []
+  }
+}
