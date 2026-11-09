@@ -1,6 +1,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import styles from "./home-hero.module.css";
+import HomeHeroShader from "./home-hero-shader";
 
 // Verified business number in international digits (no + or spaces).
 const businessWhatsAppNumber = "2347066814272";
@@ -22,6 +23,7 @@ export default function HomePage() {
           className={`${styles.image} object-cover`}
         />
 
+        <HomeHeroShader />
         <div className={styles.overlay} aria-hidden="true" />
 
         <div className="relative z-10 mx-auto flex min-h-[58vh] w-full max-w-[72rem] items-end px-4 pb-8 pt-12 sm:min-h-[64vh] sm:px-8 md:px-10 lg:min-h-[76vh] lg:px-12 lg:pb-14">
