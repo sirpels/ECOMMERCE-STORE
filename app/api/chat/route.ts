@@ -1,3 +1,4 @@
+import { isIP } from "node:net";
 import {
   convertToModelMessages,
   createUIMessageStreamResponse,
@@ -11,6 +12,7 @@ import { createAdvisorTools, prepareAdvisorToolStep } from "@/lib/ai/tools";
 import { errorCodeText } from "@/lib/ai/errors";
 import { safeStreamError, withTimeoutError } from "@/lib/ai/stream-errors";
 import { getDevScenario, devHttpResponse, getDevModel, disconnectFixture } from "@/lib/ai/dev-scenarios";
+import { createProductionRateLimiter } from "@/lib/rate-limit";
 
 export const runtime = "nodejs";
 export const maxDuration = 60;
@@ -50,10 +52,53 @@ async function readBody(request: Request): Promise<unknown> {
   }
 }
 
+function resolveClientIP(request: Request): string | null {
+  const header = request.headers.get("x-forwarded-for");
+  if (!header) return null;
+
+  const trimmed = header.trim();
+  if (!trimmed) return null;
+
+  if (!isIP(trimmed)) return null;
+
+  return trimmed;
+}
+
 export async function POST(request: Request) {
   try {
+    const body = await readBody(request);
+
+    const ip = resolveClientIP(request);
+    if (!ip) {
+      return Response.json({ code: "unavailable" }, { status: 503 });
+    }
+
+    const rateLimiter = createProductionRateLimiter();
+    if (!rateLimiter) {
+      return Response.json({ code: "unavailable" }, { status: 503 });
+    }
+
+    let rateLimitResponse;
+    try {
+      rateLimitResponse = await rateLimiter.limit(ip);
+    } catch {
+      return Response.json({ code: "unavailable" }, { status: 503 });
+    }
+
+    if (rateLimitResponse.reason === "timeout") {
+      return Response.json({ code: "unavailable" }, { status: 503 });
+    }
+
+    if (rateLimitResponse.success === false) {
+      return Response.json({ code: "rate_limit_exceeded" }, { status: 429 });
+    }
+
+    if (rateLimitResponse.success !== true) {
+      return Response.json({ code: "unavailable" }, { status: 503 });
+    }
+
     const tools = createAdvisorTools();
-    const messages = await validateAdvisorMessages(await readBody(request), tools);
+    const messages = await validateAdvisorMessages(body, tools);
     const scenario = getDevScenario();
     const testResponse = devHttpResponse(scenario);
     if (testResponse) return testResponse;

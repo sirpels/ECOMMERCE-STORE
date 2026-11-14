@@ -1,9 +1,33 @@
-# FlyRank FE-04: Fashion Store Skeleton
+# Fashion Designer's Online Storefront
 
-This is a small fashion e-commerce capstone with the FE-04 foundation (routing,
-shared layout, responsive styling, placeholders, and a working health check) and
-the FE-06 Fabric & Style Advisor. It does not include live product data, checkout,
-authentication, payments, or a database.
+This is a portfolio online storefront for a fashion designer. It is a modern,
+responsive web experience built with Next.js, React, and TypeScript, designed to
+present the designer's work and help visitors explore the collection. The
+homepage features a custom animated hero rendered with WebGL and GLSL, and the
+storefront includes an interactive 3D Bag Studio built with Three.js and React
+Three Fiber. Product discovery is supported by dedicated category and product
+pages, a cart, and an order interface. The site also includes an AI-powered
+Fabric & Style Advisor powered by Google's Gemini model for fabric, styling,
+occasion, and sewing guidance.
+
+> **Live experience, not a real store.** Checkout, payment processing,
+> authentication, and live inventory integration are intentionally not
+> implemented. Customers cannot complete real purchases through this storefront;
+> it should be viewed as an interactive portfolio and product showcase.
+
+## Screenshots
+
+### Homepage Shader
+
+![Homepage Shader](public/images/homepage-shader.png)
+
+### Interactive 3D Bag Studio
+
+![Interactive 3D Bag Studio](public/images/bag-studio.png)
+
+### AI-Powered Fabric & Style Advisor
+
+![AI-Powered Fabric & Style Advisor](public/images/ai-advisor.png)
 
 ## Stack
 
@@ -32,7 +56,19 @@ Pages and shared layout components are Server Components by default. The FE-06 a
 
 ## Environment variables
 
-Copy `.env.example` to `.env.local` for local development. `NEXT_PUBLIC_` values may be exposed to browser code; private values (such as `PRIVATE_API_KEY`) remain server-only. Do not commit `.env.local` or real secrets.
+Copy `.env.example` to `.env.local` for local development, then add the following values:
+
+- `GOOGLE_GENERATIVE_AI_API_KEY` — Google Gemini API key
+- `UPSTASH_REDIS_REST_URL` — Upstash Redis REST endpoint
+- `UPSTASH_REDIS_REST_TOKEN` — Upstash Redis REST token
+
+These variables are required for the Fabric & Style Advisor API to operate locally and in deployment. The storefront's other pages do not require these credentials to render.
+
+| Variable | Purpose | Public or server-only |
+|---|---|---|
+| `GOOGLE_GENERATIVE_AI_API_KEY` | Google Gemini API key for the Fabric & Style Advisor | Server-only |
+| `UPSTASH_REDIS_REST_URL` | Upstash Redis REST endpoint for rate limiting | Server-only |
+| `UPSTASH_REDIS_REST_TOKEN` | Upstash Redis REST token for rate limiting | Server-only |
 
 ## Run locally
 
@@ -41,14 +77,26 @@ npm install
 npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000). The app is deployable on Vercel without additional configuration.
+Open [http://localhost:3000](http://localhost:3000). Configure these three server-only environment variables in the deployment environment to enable the Fabric & Style Advisor.
 
 ## Checks
 
 ```bash
-npm run lint
-npm run build
+npm run lint        # ESLint
+npm run build       # Next.js production build
+npm test            # Vitest unit/component tests
+npm run test:e2e    # Playwright end-to-end tests
+npm run test:existing # Existing server/UI tests
+npx tsc --noEmit    # TypeScript type check
 ```
+
+## AI-assisted development
+
+This project was developed through an AI-assisted workflow. I directed the AI tools, investigated the existing codebase before making changes, made technical decisions, reviewed proposed implementations, and tested the results.
+
+I used AI as a development assistant, not as a replacement for understanding the project. I evaluated suggestions, questioned technical decisions, and checked changes against the existing architecture and project requirements.
+
+The application's AI feature is the server-side Google Gemini integration used by the Fabric & Style Advisor.
 
 ## FE-06: Fabric & Style Advisor
 
@@ -80,37 +128,23 @@ disabled. `vercel.json` enables request cancellation for this Node.js function;
 verify cancellation again on the deployed environment before release.
 
 The transcript follows new content while pinned near the bottom. Scrolling upward
-releases pinning; incoming content then offers “Jump to latest.” Returning to the
+releases pinning; incoming content then offers "Jump to latest." Returning to the
 bottom or choosing that control resumes following.
 
-### Free-tier and deployment limitations
+### Rate limiting
 
-This project does not enable billing or provision paid services. Use a Google API
-project configured for the Free Tier; account billing and eligibility cannot be
-enforced by this application. Free-tier quotas and model availability can change.
-Provider failures and quota exhaustion show a safe error instead of raw details.
+The `/api/chat` route uses Upstash Redis for sliding-window rate limiting:
 
-The endpoint is public and has no application-level per-user rate limit or
-authentication. The developer has configured protection in the Vercel Firewall;
-that external setting is not managed by this repository. Payload and token limits
-bound one request but do not guarantee remaining quota. No external rate-limiting
-dependency or conversation persistence is installed.
+- **10 requests per IP per rolling 60 seconds.**
+- Client IP is resolved from Vercel's `x-forwarded-for` header and validated with Node's `isIP()`.
+- **HTTP 429** means the rate limit was reached.
+- **HTTP 503** means the server could not safely confirm permission to continue.
+- Gemini is only called after the rate limiter confirms permission.
+- The route fails closed when Redis or the required configuration is unavailable.
+- The route uses a 60-second maximum function duration.
+- The model request has its existing 45-second abort timeout.
 
-Recommended demo protection: configure the included Vercel Hobby WAF rate-limit
-rule for POST requests to `/api/chat`, counted per IP, for example 6 requests per
-60 seconds with a block response. Vercel currently documents one rate-limit rule
-and 1,000,000 allowed requests included for Hobby; confirm the project's dashboard
-and plan before enabling anything. This requires no application dependency or
-database and has not been enabled by this code change. See
-https://vercel.com/docs/vercel-firewall/vercel-waf/rate-limiting.
-
-An in-memory counter in a serverless function is not an effective shared limit:
-instances and regions have separate memory, and restarts clear counters. Even an
-IP-based WAF rule cannot prevent distributed abuse or guarantee remaining Google
-quota; Vercel's counters are per region rather than a global quota. Shared networks
-can also cause legitimate users to share a limit. If the
-included rule is unavailable, keep the demo access restricted until suitable
-protection is agreed, rather than treating local counters as a global quota.
+Rate limiting does not guarantee protection against all abuse or guarantee remaining Gemini quota. Provider quota limits still apply independently.
 
 Manual verification: test a real streamed response, multi-turn follow-up, Stop
 before and after text arrives, Stop then Send, upward scrolling during a long
@@ -134,6 +168,30 @@ Dependency audit: the five high-severity findings are in the development-only
 ESLint chain (`eslint-config-next`, `@next/eslint-plugin-next`, `fast-glob`,
 `micromatch`, and `braces`). `npm audit --omit=dev` reported zero vulnerabilities.
 No forced fixes or dependency changes were applied during model verification.
+
+## Architecture
+
+### `app/api/chat/route.ts`
+- Reads and validates the request body (64 KB limit, JSON validation).
+- Resolves and validates the client IP from Vercel's `x-forwarded-for` header using Node's `isIP()`.
+- Calls the Upstash rate limiter; returns 429 on denial or 503 on failure.
+- Streams the Google Gemini response via `streamText` with a 45-second abort timeout.
+- Validates message structure, message counts, and character limits in `lib/ai/chat-history.ts`.
+
+### `lib/rate-limit.ts`
+- `resolveRateLimitConfig()` validates `UPSTASH_REDIS_REST_URL` (HTTPS, hostname) and `UPSTASH_REDIS_REST_TOKEN` (non-empty).
+
+- createProductionRateLimiter() creates a fresh Redis client and Ratelimit instance per request using slidingWindow(10, "1 m") with prefix ratelimit:chat. The Redis client has a 5-second abort timeout, and the Upstash Ratelimit SDK has a 6000 ms timeout.
+
+- Fail-closed: missing or invalid configuration returns `null`, and the route returns 503.
+
+### `lib/ai/config.ts`
+- Server-only model configuration and system prompt for Google Gemini (`gemini-3.5-flash-lite`).
+- `getAdvisorModel()` validates `GOOGLE_GENERATIVE_AI_API_KEY` and returns `null` if missing or placeholder.
+
+### Frontend advisor (`app/advisor/advisor-chat.tsx`)
+- Client Component using AI SDK Core's `useChat` hook.
+- Handles streaming messages, cancellation, and scroll position.
 
 ## FE-07 Phase A: Fabric Match server foundation
 
